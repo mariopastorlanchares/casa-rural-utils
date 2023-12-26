@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import pandas as pd
 
-from config.config_manager import load_config, save_config
+from manager.config_manager import load_config, save_config
 
 
 def scrape_and_process():
@@ -46,7 +46,8 @@ def scrape_clubrural(provincia, min_inquilinos, max_inquilinos):
     pagina = 1
 
     while True:
-        url = f'https://www.clubrural.com/busquedas/buscar-alojamiento.php?txtdestino={provincia}&destinoid=prov_34&fechaentrada=&fechasalida=&plazasMinimas={min_inquilinos}&adults={min_inquilinos}&childs=0&_pagi_pg={pagina}'
+        # TODO lo de la provincia no está bien, hay que obtener los ids de provincia de alguna manera
+        url = f'https://www.clubrural.com/busquedas/buscar-alojamiento.php?txtdestino={provincia}&destinoid=prov_34&fechaentrada=&fechasalida=&plazasMinimas={min_inquilinos}&adults={min_inquilinos}&childs=0&jardin=1&_pagi_pg={pagina}'
         print(f"Página: {pagina} ... ", end="", flush=True)
         response = requests.get(url)
         if response.status_code != 200:
@@ -76,9 +77,8 @@ def scrape_clubrural(provincia, min_inquilinos, max_inquilinos):
     return casas_rurales
 
 
-def scrape_festivos_espana():
+def scrape_festivos_espana(url, year):
     # Enviar solicitud HTTP para obtener el contenido de la página
-    url = 'https://www.calendarr.com/espana/calendario-2024/'
     response = requests.get(url)
     if response.status_code != 200:
         print("Error al acceder a la página")
@@ -103,3 +103,14 @@ def scrape_festivos_espana():
     # Imprimir los días festivos extraídos
     for festivo in festivos:
         print(f"{festivo['dia']} de {festivo['mes']}: {festivo['nombre']}")
+    festivos_format = [{'fecha': format_fecha(f['dia'], f['mes'], year), 'nombre': f['nombre']} for f in festivos]
+    return festivos_format
+
+
+def format_fecha(dia, mes, year):
+    meses = {'Enero': '01', 'Febrero': '02', 'Marzo': '03', 'Abril': '04', 'Mayo': '05', 'Junio': '06', 'Julio': '07',
+             'Agosto': '08', 'Septiembre': '09', 'Octubre': '10', 'Noviembre': '11', 'Diciembre': '12'}
+    mes_numero = meses[mes]
+    return f"{year}-{mes_numero}-{dia.zfill(2)}"
+
+
