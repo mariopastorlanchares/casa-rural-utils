@@ -74,3 +74,32 @@ def scrape_clubrural(provincia, min_inquilinos, max_inquilinos):
         print("OK")
         pagina += 1
     return casas_rurales
+
+
+def scrape_festivos_espana():
+    # Enviar solicitud HTTP para obtener el contenido de la página
+    url = 'https://www.calendarr.com/espana/calendario-2024/'
+    response = requests.get(url)
+    if response.status_code != 200:
+        print("Error al acceder a la página")
+        return None
+
+    # Analizar el contenido HTML
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Buscar y extraer los días festivos
+    festivos = []
+    for mes in soup.find_all('span', class_='holiday-month'):
+        mes_nombre = mes.text.strip()
+        for festivo in mes.find_next('ul', class_='list-holidays').find_all('li', class_='list-holiday-box'):
+            # Verificar si es un día festivo no laborable
+            if festivo.find('div', class_='list-holiday-dayweek holiday'):
+                dia = festivo.find('span', class_='holiday-day').text.strip()
+                nombre = festivo.find('a', class_='holiday-name').text.strip() if festivo.find('a',
+                                                                                               class_='holiday-name') else festivo.find(
+                    'span', class_='holiday-name').text.strip()
+                festivos.append({'mes': mes_nombre, 'dia': dia, 'nombre': nombre})
+
+    # Imprimir los días festivos extraídos
+    for festivo in festivos:
+        print(f"{festivo['dia']} de {festivo['mes']}: {festivo['nombre']}")
