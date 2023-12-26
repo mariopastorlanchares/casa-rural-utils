@@ -23,7 +23,18 @@ def update_json(data, section, filename='data.json'):
 def add_festivos(data, filename='data.json'):
     current_data = load_from_json(filename)
     festivos = current_data.setdefault('festivos', [])
-    festivos.extend(data)
-    # Ordenar los festivos por fecha
-    festivos.sort(key=lambda x: x['fecha'])
+
+    # Convertir la lista existente de festivos en un diccionario para evitar duplicados
+    festivos_dict = {festivo['fecha']: festivo for festivo in festivos}
+
+    # Añadir o actualizar los festivos
+    for festivo in data:
+        festivos_dict[festivo['fecha']] = festivo
+
+    # Convertir el diccionario de vuelta a una lista y ordenarla
+    festivos_ordenados = list(festivos_dict.values())
+    festivos_ordenados.sort(key=lambda x: x['fecha'])
+
+    # Guardar los festivos actualizados
+    current_data['festivos'] = festivos_ordenados
     save_to_json(current_data, filename)
