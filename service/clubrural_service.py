@@ -50,8 +50,30 @@ def get_accommodations(session):
             accommodations.append({'id': id_, 'name': name})
             print(f"{name} - {id_}")
             # Update only the accommodations in the configuration
-            config = load_config().get('clubrural', {})
-            config['accommodations'] = accommodations
-            save_config(config, 'clubrural')
+        config = load_config().get('clubrural', {})
+        config['accommodations'] = accommodations
+        save_config(config, 'clubrural')
+        return accommodations
     else:
         print("Error accessing accommodations page")
+
+
+def select_accommodation(session, accommodation_id):
+    """
+    Selecciona un alojamiento específico en Clubrural usando su ID.
+
+    :param session: Sesión actual de requests
+    :param accommodation_id: ID del alojamiento a seleccionar
+    :return: True si el alojamiento fue seleccionado correctamente, False en caso contrario
+    """
+    url = f'{BASE_URL}/intranet/preindex.php?id_aloj={accommodation_id}'
+    response = session.get(url)
+
+    if response.status_code == 200:
+        # Aquí puedes añadir una lógica adicional para verificar si el alojamiento se seleccionó correctamente
+        # Por ejemplo, buscar en el contenido de la respuesta algún texto o elemento específico que indique éxito
+        print(f"Alojamiento con ID {accommodation_id} seleccionado correctamente.")
+        return True
+    else:
+        print(f"Error al seleccionar el alojamiento con ID {accommodation_id}.")
+        return False

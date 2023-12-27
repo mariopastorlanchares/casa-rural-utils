@@ -1,4 +1,4 @@
-from service.clubrural_service import login, get_accommodations
+from service.clubrural_service import login, get_accommodations, select_accommodation
 from manager.data_manager import add_festivos
 from utils.scraping import scrape_and_process, scrape_festivos_espana
 
@@ -21,7 +21,13 @@ def main_menu():
             add_festivos(festivos)
         elif choice == '3':
             session = login()
-            get_accommodations(session)
+            accommodations = get_accommodations(session)
+            if accommodations:
+                for accommodation in accommodations:
+                    if select_accommodation(session, accommodation['id']):
+                        # Aquí se pueden realizar más operaciones para cada alojamiento seleccionado
+                        print(f"Realizando operaciones en el alojamiento: {accommodation['name']}")
+                        # Ejemplo: establecer_tarifas(session, accommodation['id'])
         elif choice == '4':
             break
 
