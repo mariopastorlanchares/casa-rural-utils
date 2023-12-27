@@ -8,7 +8,7 @@ def load_config():
         with open(CONFIG_FILE, 'r') as file:
             return json.load(file)
     except FileNotFoundError:
-        return {'scraping': {}}
+        return {'scraping': {}, 'clubrural': {}}
 
 
 def save_config(new_config, key):
