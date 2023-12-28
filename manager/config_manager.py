@@ -21,3 +21,21 @@ def save_config(new_config, key):
     # Guardar la configuración actualizada
     with open(CONFIG_FILE, 'w') as file:
         json.dump(config, file, indent=4)
+
+
+def update_accommodations(new_accommodations):
+    config = load_config()
+    clubrural_config = config.get('clubrural', {})
+    existing_accommodations = clubrural_config.get('accommodations', [])
+
+    accommodations_dict = {acc['id']: acc for acc in existing_accommodations}
+
+    for acc in new_accommodations:
+        if acc['id'] in accommodations_dict:
+            accommodations_dict[acc['id']]['name'] = acc['name']
+        else:
+            accommodations_dict[acc['id']] = acc
+
+    clubrural_config['accommodations'] = list(accommodations_dict.values())
+    save_config(clubrural_config, 'clubrural')
+

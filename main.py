@@ -1,4 +1,4 @@
-from service.clubrural_service import login, get_accommodations, select_accommodation
+from service.clubrural_service import login, get_accommodations, select_accommodation, get_current_tariffs, set_tariffs
 from manager.data_manager import add_festivos
 from utils.scraping import scrape_and_process, scrape_festivos_espana
 
@@ -24,10 +24,26 @@ def main_menu():
             accommodations = get_accommodations(session)
             if accommodations:
                 for accommodation in accommodations:
-                    if select_accommodation(session, accommodation['id']):
-                        # Aquí se pueden realizar más operaciones para cada alojamiento seleccionado
+                    roomId = select_accommodation(session, accommodation['id'])
+                    if roomId:
                         print(f"Realizando operaciones en el alojamiento: {accommodation['name']}")
-                        # Ejemplo: establecer_tarifas(session, accommodation['id'])
+                        current_tariffs = get_current_tariffs(session, roomId)
+                        print(f"Tarifas actuales para {accommodation['name']}: {current_tariffs}")
+                        new_tariffs = {}
+                        for tariff_name, tariff_info in current_tariffs.items():
+                            if isinstance(tariff_info, dict):
+                                # Para tarifas especiales con seasonId
+                                current_price = tariff_info['precio']
+                                season_id = tariff_info['seasonId']
+                                new_price = input(
+                                    f"Introduce la nueva tarifa para '{tariff_name}' (Actual: {current_price}): ")
+                                new_tariffs[tariff_name] = {'precio': new_price, 'seasonId': season_id}
+                            else:
+                                # Para tarifas base como 'Dom-Jue' y 'Vie-Sab'
+                                new_price = input(
+                                    f"Introduce la nueva tarifa para '{tariff_name}' (Actual: {tariff_info}): ")
+                                new_tariffs[tariff_name] = new_price
+                        set_tariffs(session, accommodation['id'], roomId, new_tariffs)
         elif choice == '4':
             break
 
