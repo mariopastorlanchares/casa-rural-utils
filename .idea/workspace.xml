@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="979c3351-6af6-4412-a6e9-76f4366a91b4" name="Changes" comment="feat - seleccionar alojamiento. crl-1">
+    <list default="true" id="979c3351-6af6-4412-a6e9-76f4366a91b4" name="Changes" comment="feat - establecer tarifas. crl-2">
+      <change afterPath="$PROJECT_DIR$/manager/season_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manager/config_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/manager/config_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/service/clubrural_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/service/clubrural_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -17,6 +17,20 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;mariopastorlanchares&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="908eb0f2-0e91-4036-8f00-cb9c6f8a7ea5" />
+        <option name="url" value="https://github.com/mariopastorlanchares/casa-rural-utils.git" />
+      </UrlAndAccount>
+    </option>
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
@@ -136,7 +150,15 @@
       <option name="project" value="LOCAL" />
       <updated>1703667445982</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="feat - establecer tarifas. crl-2">
+      <option name="closed" value="true" />
+      <created>1703782377798</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1703782377798</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -147,6 +169,7 @@
     <MESSAGE value="chore - ignore .idea" />
     <MESSAGE value="feat - login y extracción de data clubrural. codebase gen" />
     <MESSAGE value="feat - seleccionar alojamiento. crl-1" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat - seleccionar alojamiento. crl-1" />
+    <MESSAGE value="feat - establecer tarifas. crl-2" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat - establecer tarifas. crl-2" />
   </component>
 </project>

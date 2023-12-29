@@ -100,7 +100,7 @@ def select_accommodation(session, accommodation_id):
         return None
 
 
-def get_current_tariffs(session, room_id):
+def get_current_rates(session, room_id):
     """
     Obtiene las tarifas actuales para un alojamiento específico.
 
@@ -138,7 +138,7 @@ def get_current_tariffs(session, room_id):
         return {}
 
 
-def set_tariffs(session, accommodation_id, room_id, new_tariffs):
+def set_rates(session, accommodation_id, room_id, new_tariffs):
     """
     Establece una nueva tarifa para un alojamiento en Clubrural.
 
@@ -157,7 +157,8 @@ def set_tariffs(session, accommodation_id, room_id, new_tariffs):
         'basetarifaDJ': new_tariffs.get('Dom-Jue', '')['precio'],
         'basetarifaVS': new_tariffs.get('Vie-Sab', '')['precio'],
         'baseDiasDJ': 2,
-        'baseDiasVS': 2,
+        # 1 significa 2 días, no sé por qué
+        'baseDiasVS': 1,
     }
     # Agregar tarifas variables al payload
     for name, data in new_tariffs.items():
@@ -177,3 +178,33 @@ def set_tariffs(session, accommodation_id, room_id, new_tariffs):
     else:
         print("Error al establecer la tarifa para alojamiento:", accommodation_id)
         return False
+
+
+def update_accommodation_dates(session, accommodation_id, rate_info, rate_name, special_dates):
+    print(rate_info)
+    url = f'{BASE_URL}/intranet/controlador.tarifas.php'
+    season_id = rate_info['seasonId']
+    # Construir el FormData
+    form_data = {
+        'alojId': accommodation_id,
+        'id': season_id,
+        'updateEspecial': season_id,
+        'name': rate_name,
+        'tarifa': rate_info['precio'],
+        'nnoches': 3,  # Ajusta según sea necesario
+    }
+
+    # Agregar las fechas especiales
+    for date in special_dates:
+        form_data[f"dates[{date.strftime('%Y')}][{date.strftime('%m%d')}]"] = 1
+
+    # Realizar la solicitud POST
+    response = session.post(url, data=form_data)
+
+    # Procesar y devolver la respuesta
+    if response.status_code == 200:
+        print("Fechas actualizadas correctamente")
+    else:
+        print(f"Hubo un error al establecer fechas {response}")
+
+    return response
