@@ -1,7 +1,9 @@
 from manager.season_manager import set_special_seasons
-from service.clubrural_service import login, get_accommodations, select_accommodation, get_current_rates, set_rates, \
+from service.clubrural_service import login_clubrural, get_accommodations, select_accommodation, get_current_rates, \
+    set_rates, \
     update_accommodation_dates
 from manager.data_manager import add_festivos
+from service.escapadarural_service import login_escapadarural, update_high_season_escapada
 from utils.scraping import scrape_and_process, scrape_festivos_espana
 
 
@@ -11,7 +13,8 @@ def main_menu():
         print("2. Obtener festivos España")
         print("3. Establecer tarifas Clubrural")
         print("4. Actualizar calendario de temporadas especiales Clubrural")
-        print("5. Salir")
+        print("5. Actualizar calendario de temporada alta EscapadaRural")
+        print("6. Salir")
         choice = input("Elige una opción: ")
 
         if choice == '1':
@@ -23,7 +26,7 @@ def main_menu():
             # Agregar los festivos al archivo JSON
             add_festivos(festivos)
         elif choice == '3':
-            session = login()
+            session = login_clubrural()
             accommodations = get_accommodations(session)
             if accommodations:
                 for accommodation in accommodations:
@@ -48,7 +51,7 @@ def main_menu():
                                 new_rates[rate_name] = new_price
                         set_rates(session, accommodation['id'], roomId, new_rates)
         elif choice == '4':
-            session = login()
+            session = login_clubrural()
             if session is not None:
                 accommodations = get_accommodations(session)
                 for accommodation in accommodations:
@@ -63,6 +66,11 @@ def main_menu():
                             update_accommodation_dates(session, accommodation['id'], rate_info, rate_name,
                                                        special_dates)
         elif choice == '5':
+            # Llamar a la función para gestionar EscapadaRural
+            session, user_id = login_escapadarural()
+            special_dates = set_special_seasons()
+            update_high_season_escapada(session, special_dates)
+        elif choice == '6':
             break
 
 

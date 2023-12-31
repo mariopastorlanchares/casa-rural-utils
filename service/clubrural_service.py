@@ -8,7 +8,7 @@ from manager.config_manager import save_config, load_config, update_accommodatio
 BASE_URL = 'https://www.clubrural.com'
 
 
-def login():
+def login_clubrural():
     session = requests.Session()
 
     config = load_config().get('clubrural', {})
