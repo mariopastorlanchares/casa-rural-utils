@@ -20,7 +20,7 @@ def load_ical(url_or_path):
             return Calendar.from_ical(f.read())
 
 
-def get_ical_events(calendar):
+def get_ical_dates(calendar):
     """
     Extrae los eventos de un objeto Calendar y los devuelve como una lista de fechas individuales
     a partir de la fecha actual en adelante.

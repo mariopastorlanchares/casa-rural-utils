@@ -169,7 +169,6 @@ def get_occupied_dates(session, user_id, cottage_id, rent_unit_id):
             dates_closed = dates_closed_match.group(1)
             # Eliminar comillas y dividir por coma para obtener una lista de fechas
             dates_closed_list = [date.strip().strip("'") for date in dates_closed.split(',')]
-            print(dates_closed_list)
             return dates_closed_list
         else:
             print("No se encontraron fechas cerradas.")
@@ -178,3 +177,30 @@ def get_occupied_dates(session, user_id, cottage_id, rent_unit_id):
         print(f"Error al obtener las fechas cerradas para el alojamiento {cottage_id} y la unidad {rent_unit_id}")
         return []
 
+def update_calendar_dates(session, user_id, cottage_id, rent_unit_id, dates_close, dates_open):
+    """
+    Actualiza las fechas del calendario en EscapadaRural.
+
+    :param session: Sesión activa con EscapadaRural
+    :param user_id: ID del propietario
+    :param cottage_id: ID del alojamiento
+    :param rent_unit_id: ID de la unidad alquilable
+    :param dates_close: Lista de fechas para cerrar
+    :param dates_open: Lista de fechas para abrir
+    """
+    url = f"{BASE_URL}/owner/{user_id}/cottage/{cottage_id}/calendar-update/{rent_unit_id}"
+    headers = {
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+    }
+    payload = {
+        'dates_close': ",".join(['"{}"'.format(date) for date in dates_close]),
+        'dates_open': ",".join(['"{}"'.format(date) for date in dates_open])
+    }
+    payload = 'dates_close=[{0}]&dates_open=[{1}]'.format(payload['dates_close'], payload['dates_open'])
+
+    response = session.post(url, data=payload, headers=headers)
+    if response.status_code == 200:
+        print(f"Calendario actualizado correctamente: {response.text}")
+    else:
+        print(f"Error al actualizar el calendario: {response.status_code} - {response.text}")
