@@ -2,6 +2,7 @@ import requests
 from icalendar import Calendar, Event
 from datetime import datetime
 from manager.config_manager import load_config, save_config
+from datetime import datetime, timedelta
 
 
 def load_ical(url_or_path):
@@ -21,50 +22,27 @@ def load_ical(url_or_path):
 
 def get_ical_events(calendar):
     """
-    Extrae los eventos de un objeto Calendar.
+    Extrae los eventos de un objeto Calendar y los devuelve como una lista de fechas individuales
+    a partir de la fecha actual en adelante.
     """
-    events = []
+    today = datetime.now().date()  # Obtener la fecha actual
+    occupied_dates = set()  # Usamos un conjunto para evitar fechas duplicadas
+
     for component in calendar.walk():
         if component.name == "VEVENT":
-            events.append({
-                "summary": str(component.get('summary')),
-                "start": component.get('dtstart').dt,
-                "end": component.get('dtend').dt
-            })
-    return events
+            start = component.get('dtstart').dt
+            end = component.get('dtend').dt
+            delta = (end - start).days
 
+            # Agregar cada fecha del intervalo al conjunto si es hoy o en el futuro
+            for i in range(delta):
+                current_date = start + timedelta(days=i)
+                if current_date >= today:
+                    occupied_dates.add(current_date.isoformat())
 
-def sync_ical_with_escapadarural(accommodation_code):
-    """
-    Sincroniza los eventos de iCal con las fechas de disponibilidad de EscapadaRural.
-    """
-    config = load_config().get('escapadarural', {})
-    accommodations = config.get('accommodations', [])
+    # Convertir el conjunto a una lista y ordenarla
+    return sorted(list(occupied_dates))
 
-    # Buscar el alojamiento por código y actualizarlo
-    accommodation_found = False
-    for acc in accommodations:
-        if acc.get('id') == accommodation_code:
-            accommodation_found = True
-            if 'ical_url' in acc:
-                try:
-                    calendar = load_ical(acc['ical_url'])
-                    events = get_ical_events(calendar)
-                    print(f"Eventos iCal para {accommodation_code}: {events}")
-                except Exception as e:
-                    print(f"Error: {e}")
-            else:
-                # Guardar URL de iCal si no está presente
-                ical_url = input(f"Introduce la URL del iCal para {accommodation_code}: ")
-                acc['ical_url'] = ical_url
-                print(f"URL de iCal guardada para {accommodation_code}. Vuelve a ejecutar para sincronizar.")
-            break
-
-    if not accommodation_found:
-        print(f"No se encontró el alojamiento con el código {accommodation_code}.")
-
-    if accommodation_found:
-        save_config(config, 'escapadarural')
 
 
 if __name__ == "__main__":

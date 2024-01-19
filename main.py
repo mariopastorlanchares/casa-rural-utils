@@ -5,7 +5,7 @@ from service.clubrural_service import login_clubrural, get_accommodations, selec
 from manager.data_manager import add_festivos
 from service.escapadarural_service import login_escapadarural, update_high_season_escapada
 from utils.scraping import scrape_and_process, scrape_festivos_espana
-from service.ical_service import sync_ical_with_escapadarural
+from manager.occupancy_manager import sync_ical_with_escapadarural
 
 
 def main_menu(choice=None, accommodation_code=None):
@@ -16,7 +16,7 @@ def main_menu(choice=None, accommodation_code=None):
             print("3. Establecer tarifas Clubrural")
             print("4. Actualizar calendario de temporadas especiales Clubrural")
             print("5. Actualizar calendario de temporada alta EscapadaRural")
-            print("6. Sincronizar iCal con EscapadaRural")  # Nueva opción
+            print("6. Sincronizar iCal con EscapadaRural")
             print("7. Salir")
             choice = input("Elige una opción: ")
 

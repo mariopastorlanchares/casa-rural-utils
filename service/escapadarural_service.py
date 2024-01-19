@@ -46,15 +46,28 @@ def login_escapadarural():
                 if user_id_match:
                     user_id = user_id_match.group(1)
                     print(f"ID del propietario: {user_id}")
-                    # Obtener IDs de los alojamientos
-                    accommodations = get_accommodations_ids(session, user_id)
-                    # Guardar ID del propietario y los alojamientos en la configuración
-                    escapadarural_config = {
-                        'username': username,
-                        'password': password,
-                        'owner_id': user_id,
-                        'accommodations': accommodations
-                    }
+                    # Obtener los nuevos datos de los alojamientos
+                    new_accommodations_data = get_accommodations_ids(session, user_id)
+
+                    # Cargar la configuración existente
+                    escapadarural_config = load_config().get('escapadarural', {})
+                    existing_accommodations = escapadarural_config.get('accommodations', [])
+
+                    # Crear un diccionario con los ID de los alojamientos como claves para facilitar la búsqueda
+                    existing_accommodations_dict = {acc['id']: acc for acc in existing_accommodations}
+
+                    # Actualizar los alojamientos existentes o añadir nuevos
+                    for new_acc in new_accommodations_data:
+                        acc_id = new_acc['id']
+                        if acc_id in existing_accommodations_dict:
+                            # Actualizar la información del alojamiento existente
+                            existing_accommodations_dict[acc_id].update(new_acc)
+                        else:
+                            # Añadir un nuevo alojamiento
+                            existing_accommodations.append(new_acc)
+
+                    # Guardar la configuración actualizada
+                    escapadarural_config['accommodations'] = list(existing_accommodations_dict.values())
                     save_config(escapadarural_config, 'escapadarural')
                     return session, user_id
                 else:
@@ -67,6 +80,7 @@ def login_escapadarural():
         print("Login failed. Please try again.")
 
     return None, None
+
 
 def get_accommodations_ids(session, owner_id):
     url = f"{BASE_URL}/owner/{owner_id}/calendar-quick/rent-unit"
@@ -96,6 +110,7 @@ def get_accommodations_ids(session, owner_id):
 
     return accommodations
 
+
 def get_first_rent_unit_id(session, owner_id, cottage_id):
     url = f"{BASE_URL}/owner/{owner_id}/calendar-quick/rent-unit?select_cottage={cottage_id}"
     response = session.get(url)
@@ -105,7 +120,6 @@ def get_first_rent_unit_id(session, owner_id, cottage_id):
         if rent_unit_select and rent_unit_select.find('option'):
             return rent_unit_select.find('option')['value']
     return None
-
 
 
 def request_login_data():
@@ -123,3 +137,44 @@ def update_high_season_escapada(session, dates):
             print(f"Temporada alta establecida para {date}")
         else:
             print(f"Error al establecer temporada alta para {date}: {response.status_code}")
+
+
+def get_occupied_dates(session, user_id, cottage_id, rent_unit_id):
+    """
+    Extrae las fechas cerradas para un alojamiento y unidad alquilable específicos.
+
+    :param session: Sesión activa con EscapadaRural
+    :param user_id: ID del propietario
+    :param cottage_id: ID del alojamiento
+    :param rent_unit_id: ID de la unidad alquilable
+    :return: Lista con las fechas cerradas
+    """
+    url = f"{BASE_URL}/owner/{user_id}/calendar-quick/rent-unit?select_cottage={cottage_id}&select_rentunit={rent_unit_id}"
+    response = session.get(url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # Buscar el atributo x-data que contiene 'PCalendar' en su valor
+        calendar_data_div = soup.find(lambda tag: tag.name == "div" and 'PCalendar' in tag.get('x-data', ''))
+
+        if not calendar_data_div:
+            print("No se encontró la información del calendario.")
+            return []
+
+        script_text = calendar_data_div['x-data']
+
+        # Buscar el array de fechas cerradas en el texto del script
+        dates_closed_match = re.search(r"dates_closed: \[([^\]]+)\]", script_text)
+        if dates_closed_match:
+            # Limpiar y convertir a lista
+            dates_closed = dates_closed_match.group(1)
+            # Eliminar comillas y dividir por coma para obtener una lista de fechas
+            dates_closed_list = [date.strip().strip("'") for date in dates_closed.split(',')]
+            print(dates_closed_list)
+            return dates_closed_list
+        else:
+            print("No se encontraron fechas cerradas.")
+            return []
+    else:
+        print(f"Error al obtener las fechas cerradas para el alojamiento {cottage_id} y la unidad {rent_unit_id}")
+        return []
+
