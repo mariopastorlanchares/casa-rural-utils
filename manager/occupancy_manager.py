@@ -29,10 +29,13 @@ def sync_ical_with_escapadarural(cottage_id):
                     escapada_dates = get_occupied_dates(session, user_id, cottage_id, rent_unit_id)
                     print(f"Fechas Escapada Rural para {acc.get('name')}: {escapada_dates}")
                     dates_to_close, dates_to_open = sync_dates(ical_dates, escapada_dates)
-                    print(f"Fechas a cerrar: {dates_to_close}")
-                    print(f"Fechas a abrir: {dates_to_open}")
-                    update_calendar_dates(session, user_id, cottage_id, rent_unit_id, dates_to_close,
+                    if dates_to_close or dates_to_open:
+                        print(f"Fechas a cerrar: {dates_to_close}")
+                        print(f"Fechas a abrir: {dates_to_open}")
+                        update_calendar_dates(session, user_id, cottage_id, rent_unit_id, dates_to_close,
                                           dates_to_open)
+                    else:
+                        print("No hay cambios en las fechas.")
 
                 except Exception as e:
                     print(f"Error: {e}")
