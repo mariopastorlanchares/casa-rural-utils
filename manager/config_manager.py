@@ -1,6 +1,11 @@
 import json
+import os
 
-CONFIG_FILE = 'config.json'
+# Obtener el directorio del archivo actual (config_manager.py)
+current_dir = os.path.dirname(__file__)
+# Subir un nivel en la estructura de directorios para llegar al directorio raíz del proyecto
+project_root = os.path.dirname(current_dir)
+CONFIG_FILE = os.path.join(project_root, 'config.json')
 
 
 def load_config():

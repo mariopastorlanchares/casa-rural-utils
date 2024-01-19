@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="979c3351-6af6-4412-a6e9-76f4366a91b4" name="Changes" comment="feat - obtenidas todas las fechas de escapada y de ical. cru-3">
+    <list default="true" id="979c3351-6af6-4412-a6e9-76f4366a91b4" name="Changes" comment="feat - sincronización de calendarios conseguida. cru-3">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manager/occupancy_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/manager/occupancy_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/service/escapadarural_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/service/escapadarural_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/service/ical_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/service/ical_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manager/config_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/manager/config_manager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -174,7 +172,15 @@
       <option name="project" value="LOCAL" />
       <updated>1705663747557</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="feat - sincronización de calendarios conseguida. cru-3">
+      <option name="closed" value="true" />
+      <created>1705664891030</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1705664891030</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -188,6 +194,7 @@
     <MESSAGE value="feat - establecer tarifas. crl-2" />
     <MESSAGE value="feat - establecer fechas temporada alta. crl-3" />
     <MESSAGE value="feat - obtenidas todas las fechas de escapada y de ical. cru-3" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat - obtenidas todas las fechas de escapada y de ical. cru-3" />
+    <MESSAGE value="feat - sincronización de calendarios conseguida. cru-3" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat - sincronización de calendarios conseguida. cru-3" />
   </component>
 </project>
