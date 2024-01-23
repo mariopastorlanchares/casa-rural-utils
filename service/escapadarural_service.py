@@ -11,75 +11,87 @@ def login_escapadarural():
     login_url = f"{BASE_URL}/propietario/acceso"
     headers = {}
 
-    config = load_config().get('escapadarural', {})
-    username = config.get('username')
-    password = config.get('password')
+    escapada_rural_config = load_config().get('escapadarural', {})
 
-    if not username or not password:
-        # Si no existen las credenciales, solicitarlas al usuario
-        username, password = request_login_data()
+    while True:
+        username = escapada_rural_config.get('username')
+        password = escapada_rural_config.get('password')
 
-    payload = {
-        'signin[username]': username,
-        'signin[password]': password,
-        'signin[remember]': 'on'
-    }
+        if not username or not password:
+            # Si no existen las credenciales, solicitarlas al usuario
+            username, password = request_login_data()
 
-    response = session.post(login_url, data=payload, headers=headers, allow_redirects=False)
-    if response.status_code == 302:
-        first_redirect_url = response.headers.get('Location', '')
-        if first_redirect_url.startswith('/'):
-            first_redirect_url = f"{BASE_URL}{first_redirect_url}"
+        payload = {
+            'signin[username]': username,
+            'signin[password]': password,
+            'signin[remember]': 'on'
+        }
 
-        response = session.get(first_redirect_url, headers=headers, allow_redirects=False)
-
+        response = session.post(login_url, data=payload, headers=headers, allow_redirects=False)
         if response.status_code == 302:
-            second_redirect_url = response.headers.get('Location', '')
-            if second_redirect_url.startswith('/'):
-                second_redirect_url = f"{BASE_URL}{second_redirect_url}"
+            first_redirect_url = response.headers.get('Location', '')
+            if first_redirect_url.startswith('/'):
+                first_redirect_url = f"{BASE_URL}{first_redirect_url}"
 
-            response = session.get(second_redirect_url, headers=headers)
+            response = session.get(first_redirect_url, headers=headers, allow_redirects=False)
 
-            if response.status_code == 200:
-                print("Redireccionado a la página del menú del propietario")
-                user_id_match = re.search(r'/propietario/(.+?)/menu', second_redirect_url)
-                if user_id_match:
-                    user_id = user_id_match.group(1)
-                    print(f"ID del propietario: {user_id}")
-                    # Obtener los nuevos datos de los alojamientos
-                    new_accommodations_data = get_accommodations_ids(session, user_id)
+            if response.status_code == 302:
+                second_redirect_url = response.headers.get('Location', '')
+                if second_redirect_url.startswith('/'):
+                    second_redirect_url = f"{BASE_URL}{second_redirect_url}"
 
-                    # Cargar la configuración existente
-                    escapadarural_config = load_config().get('escapadarural', {})
-                    existing_accommodations = escapadarural_config.get('accommodations', [])
+                response = session.get(second_redirect_url, headers=headers)
 
-                    # Crear un diccionario con los ID de los alojamientos como claves para facilitar la búsqueda
-                    existing_accommodations_dict = {acc['id']: acc for acc in existing_accommodations}
-
-                    # Actualizar los alojamientos existentes o añadir nuevos
-                    for new_acc in new_accommodations_data:
-                        acc_id = new_acc['id']
-                        if acc_id in existing_accommodations_dict:
-                            # Actualizar la información del alojamiento existente
-                            existing_accommodations_dict[acc_id].update(new_acc)
-                        else:
-                            # Añadir un nuevo alojamiento
-                            existing_accommodations.append(new_acc)
-
-                    # Guardar la configuración actualizada
-                    escapadarural_config['accommodations'] = list(existing_accommodations_dict.values())
-                    save_config(escapadarural_config, 'escapadarural')
-                    return session, user_id
+                if response.status_code == 200:
+                    # Establecemos user y password correctos
+                    escapada_rural_config['username'] = username
+                    escapada_rural_config['password'] = password
+                    save_config(escapada_rural_config, 'escapadarural')
+                    print("Redireccionado a la página del menú del propietario")
+                    user_id_match = re.search(r'/propietario/(.+?)/menu', second_redirect_url)
+                    if user_id_match:
+                        user_id = user_id_match.group(1)
+                        print(f"ID del propietario: {user_id}")
+                        return session, user_id
+                    else:
+                        print("No se pudo encontrar el ID del propietario en la URL")
                 else:
-                    print("No se pudo encontrar el ID del propietario en la URL")
+                    print("Error al seguir la segunda redirección")
             else:
-                print("Error al seguir la segunda redirección")
+                print("URL de redirección intermedia no encontrada o no hay segunda redirección")
         else:
-            print("URL de redirección intermedia no encontrada o no hay segunda redirección")
-    else:
-        print("Login failed. Please try again.")
+            print("Login failed. Please try again.")
+            # Restablecer las credenciales en la configuración para el próximo intento
+            escapada_rural_config['username'] = None
+            escapada_rural_config['password'] = None
 
+            # Pregunta al usuario si quiere intentar de nuevo
+            retry = input("¿Quieres intentar iniciar sesión nuevamente? (s/n): ")
+            if retry.lower() != 's':
+                break
     return None, None
+
+
+def update_accomodation_data(session, user_id):
+    escapada_rural_config = load_config().get('escapadarural', {})
+    # Obtener los nuevos datos de los alojamientos
+    new_accommodations_data = get_accommodations_ids(session, user_id)
+    # Cargar la configuración existente
+    existing_accommodations = escapada_rural_config.get('accommodations', [])
+    # Crear un diccionario con los ID de los alojamientos como claves para facilitar la búsqueda
+    existing_accommodations_dict = {acc['id']: acc for acc in existing_accommodations}
+    # Actualizar los alojamientos existentes o añadir nuevos
+    for new_acc in new_accommodations_data:
+        acc_id = new_acc['id']
+        if acc_id in existing_accommodations_dict:
+            # Actualizar la información del alojamiento existente
+            existing_accommodations_dict[acc_id].update(new_acc)
+        else:
+            # Añadir un nuevo alojamiento
+            existing_accommodations_dict[acc_id] = new_acc
+    # Guardar la configuración actualizada
+    escapada_rural_config['accommodations'] = list(existing_accommodations_dict.values())
+    save_config(escapada_rural_config, 'escapadarural')
 
 
 def get_accommodations_ids(session, owner_id):
@@ -177,6 +189,7 @@ def get_occupied_dates(session, user_id, cottage_id, rent_unit_id):
         print(f"Error al obtener las fechas cerradas para el alojamiento {cottage_id} y la unidad {rent_unit_id}")
         return []
 
+
 def update_calendar_dates(session, user_id, cottage_id, rent_unit_id, dates_close, dates_open):
     """
     Actualiza las fechas del calendario en EscapadaRural.
@@ -204,3 +217,28 @@ def update_calendar_dates(session, user_id, cottage_id, rent_unit_id, dates_clos
         print(f"Calendario actualizado correctamente: {response.text}")
     else:
         print(f"Error al actualizar el calendario: {response.status_code} - {response.text}")
+
+
+def choose_cottage_id():
+    config = load_config().get('escapadarural', {})
+    accommodations = config.get('accommodations', [])
+    if not accommodations:
+        print("No hay alojamientos disponibles.")
+        return
+
+    # Mostrar un menú con los alojamientos disponibles
+    print("Elije un alojamiento:")
+    for index, acc in enumerate(accommodations, start=1):
+        print(f"{index}. {acc.get('name')} {acc.get('id')}")
+
+    # Leer la elección del usuario
+    try:
+        choice = int(input("Introduce el número del alojamiento: "))
+        if choice < 1 or choice > len(accommodations):
+            print("Número fuera de rango.")
+            return
+    except ValueError:
+        print("Por favor, introduce un número válido.")
+        return
+    selected_accommodation = accommodations[choice - 1]
+    return selected_accommodation.get('id')

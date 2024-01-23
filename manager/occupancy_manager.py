@@ -6,8 +6,7 @@ from service.ical_service import load_ical, get_ical_dates
 from manager.config_manager import load_config, save_config
 
 
-def sync_ical_with_escapadarural(cottage_id):
-    session, user_id = login_escapadarural()
+def sync_ical_with_escapadarural(session, user_id, cottage_id):
     """
     Sincroniza los eventos de iCal con las fechas de disponibilidad de EscapadaRural.
     """
@@ -33,7 +32,7 @@ def sync_ical_with_escapadarural(cottage_id):
                         print(f"Fechas a cerrar: {dates_to_close}")
                         print(f"Fechas a abrir: {dates_to_open}")
                         update_calendar_dates(session, user_id, cottage_id, rent_unit_id, dates_to_close,
-                                          dates_to_open)
+                                              dates_to_open)
                     else:
                         print("No hay cambios en las fechas.")
 

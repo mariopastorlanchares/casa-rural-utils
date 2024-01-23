@@ -3,12 +3,13 @@ from manager.season_manager import set_special_seasons
 from service.clubrural_service import login_clubrural, get_accommodations, select_accommodation, get_current_rates, \
     set_rates, update_accommodation_dates
 from manager.data_manager import add_festivos
-from service.escapadarural_service import login_escapadarural, update_high_season_escapada
+from service.escapadarural_service import login_escapadarural, update_high_season_escapada, update_accomodation_data, \
+    choose_cottage_id
 from utils.scraping import scrape_and_process, scrape_festivos_espana
 from manager.occupancy_manager import sync_ical_with_escapadarural
 
 
-def main_menu(choice=None, accommodation_code=None):
+def main_menu(choice=None, cottage_id=None):
     if choice is None:
         while True:
             print("1. Scrapear precios Clubrural")
@@ -22,13 +23,13 @@ def main_menu(choice=None, accommodation_code=None):
 
             if choice == '7':
                 break
-            execute_choice(choice, accommodation_code)
+            execute_choice(choice, cottage_id)
 
     else:
-        execute_choice(choice, accommodation_code)
+        execute_choice(choice, cottage_id)
 
 
-def execute_choice(choice, accommodation_code):
+def execute_choice(choice, cottage_id):
     if choice == '1':
         scrape_and_process()
     elif choice == '2':
@@ -76,15 +77,22 @@ def execute_choice(choice, accommodation_code):
                         # Aquí se actualizarían las fechas especiales para el alojamiento en Clubrural
                         update_accommodation_dates(session, accommodation['id'], rate_info, rate_name,
                                                    special_dates)
+    # Actualizar calendario de temporada alta EscapadaRural
     elif choice == '5':
         # Llamar a la función para gestionar EscapadaRural
         session, user_id = login_escapadarural()
+        # Necesitamos actualizar los datos de alojamientos de escapada
+        update_accomodation_data(session, user_id)
         special_dates = set_special_seasons()
         update_high_season_escapada(session, special_dates)
     elif choice == '6':
-        if accommodation_code is None:
-            accommodation_code = input("Introduce el código de la casa: ")
-        sync_ical_with_escapadarural(accommodation_code)  # Asumiendo que esta función está implementada
+        session, user_id = login_escapadarural()
+        # Refrescamos datos de alojamientos antes de continuar
+        update_accomodation_data(session, user_id)
+        # Si no hemos recibido el dato preguntamos al usuario
+        if cottage_id is None:
+            cottage_id = choose_cottage_id()
+        sync_ical_with_escapadarural(session, user_id, cottage_id)
 
 
 if __name__ == "__main__":
