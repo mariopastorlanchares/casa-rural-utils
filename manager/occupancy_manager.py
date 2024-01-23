@@ -18,38 +18,45 @@ def sync_ical_with_escapadarural(session, user_id, cottage_id):
     for acc in accommodations:
         if acc.get('id') == cottage_id:
             accommodation_found = True
-            if 'ical_url' in acc:
-                try:
-                    calendar = load_ical(acc['ical_url'])
-                    ical_dates = get_ical_dates(calendar)
-                    print(f"Eventos iCal para {acc.get('name')}: {ical_dates}")
+            while True:
+                if 'ical_url' in acc:
+                    try:
+                        calendar = load_ical(acc['ical_url'])
+                        ical_dates = get_ical_dates(calendar)
+                        print(f"Eventos iCal para {acc.get('name')}: {ical_dates}")
 
-                    rent_unit_id = acc.get('rent_unit_id')
-                    escapada_dates = get_occupied_dates(session, user_id, cottage_id, rent_unit_id)
-                    print(f"Fechas Escapada Rural para {acc.get('name')}: {escapada_dates}")
-                    dates_to_close, dates_to_open = sync_dates(ical_dates, escapada_dates)
-                    if dates_to_close or dates_to_open:
-                        print(f"Fechas a cerrar: {dates_to_close}")
-                        print(f"Fechas a abrir: {dates_to_open}")
-                        update_calendar_dates(session, user_id, cottage_id, rent_unit_id, dates_to_close,
-                                              dates_to_open)
-                    else:
-                        print("No hay cambios en las fechas.")
+                        rent_unit_id = acc.get('rent_unit_id')
+                        escapada_dates = get_occupied_dates(session, user_id, cottage_id, rent_unit_id)
+                        print(f"Fechas Escapada Rural para {acc.get('name')}: {escapada_dates}")
+                        dates_to_close, dates_to_open = sync_dates(ical_dates, escapada_dates)
 
-                except Exception as e:
-                    print(f"Error: {e}")
-            else:
-                # Guardar URL de iCal si no está presente
+                        if dates_to_close or dates_to_open:
+                            print(f"Fechas a cerrar: {dates_to_close}")
+                            print(f"Fechas a abrir: {dates_to_open}")
+                            update_calendar_dates(session, user_id, cottage_id, rent_unit_id, dates_to_close,
+                                                  dates_to_open)
+                        else:
+                            print("No hay cambios en las fechas.")
+                        break
+
+                    except Exception as e:
+                        print(f"Error al procesar el iCal: {e}")
+                        # Opción para reintentar con otra URL de iCal
+                        retry = input("¿Quieres intentar con otra URL de iCal? (s/n): ")
+                        if retry.lower() != 's':
+                            break
+
+                # Solicitar URL de iCal si no está presente o si se quiere reintentar
                 ical_url = input(f"Introduce la URL del iCal para {cottage_id}: ")
                 acc['ical_url'] = ical_url
-                print(f"URL de iCal guardada para {cottage_id}. Vuelve a ejecutar para sincronizar.")
+                print(f"URL de iCal actualizada para {cottage_id}.")
+
+            # Guardar la configuración actualizada
+            save_config(config, 'escapadarural')
             break
 
     if not accommodation_found:
         print(f"No se encontró el alojamiento con el código {cottage_id}.")
-
-    if accommodation_found:
-        save_config(config, 'escapadarural')
 
 
 def sync_dates(ical_dates, portal_dates):
