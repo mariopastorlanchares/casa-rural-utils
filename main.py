@@ -1,5 +1,6 @@
 import argparse
 from manager.season_manager import set_special_seasons
+from service.casasrurales_net_service import login_casasrurales_net, set_closed_dates
 from service.clubrural_service import login_clubrural, get_accommodations, select_accommodation, get_current_rates, \
     set_rates, update_accommodation_dates
 from manager.data_manager import add_festivos
@@ -18,10 +19,11 @@ def main_menu(choice=None, cottage_id=None):
             print("4. Actualizar calendario de temporadas especiales Clubrural")
             print("5. Actualizar calendario de temporada alta EscapadaRural")
             print("6. Sincronizar iCal con EscapadaRural")
-            print("7. Salir")
+            print("7. Actualizar calendario de temporada alta en CasasRurales.net")
+            print("8. Salir")
             choice = input("Elige una opción: ")
 
-            if choice == '7':
+            if choice == '8':
                 break
             execute_choice(choice, cottage_id)
 
@@ -93,6 +95,8 @@ def execute_choice(choice, cottage_id):
         if cottage_id is None:
             cottage_id = choose_cottage_id()
         sync_ical_with_escapadarural(session, user_id, cottage_id)
+    elif choice == '7':
+        set_closed_dates()
 
 
 if __name__ == "__main__":
